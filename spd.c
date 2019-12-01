@@ -8,36 +8,53 @@
 
 #include "spd.h"
 
-audio_data_t read_audio_file(char* path) {
+int read_audio_file(char* path, audio_data_t* data) {
 
     av_register_all();
-
+    avcodec_register_all();
 
     // get audio format from file 
-    AVFormatContext* format = avformat_alloc_context();
+    AVFormatContext* format = NULL;
+    AVDictionaryEntry *tag = NULL;
 
     if (avformat_open_input(&format, path, NULL, NULL) != 0) {
         printf("mm bad\n");
-        return;
+        return -1;
     }
 
     if (avformat_find_stream_info(format, NULL) < 0) {
         printf("Could not retrieve stream info from file '%s'\n", path);
-        return;
+        return -1;
     }
 
+    if (format->nb_streams <= 0) {
+        printf("no stream to read\n");
+        return -1;
+    }
 
-    audio_data_t out;
+    AVStream *stream = format->streams[0];
+    AVCodec *dec = avcodec_find_decoder(stream->codecpar->codec_id);
+    AVCodecContext *codec_ctx;
 
-    out.bitrate = format->bit_rate;
-    out.has_metadata = 0;
-    out.sample_rate = 44100;
+    if (!dec) {
+        printf("failed to find decoder for stream\n");
+        return -1;
+    }
 
-    return out; 
+    codec_ctx = avcodec_alloc_context3(dec);
+    if (!codec_ctx) {
+        printf("Failed to allocate the decoder context for stream\n");
+        return -1;
+    }
+    data->sample_rate = stream->codecpar->sample_rate;
+    data->format = stream->codecpar->format;
+    data->has_metadata = av_dict_count(format->metadata) > 0;
+
+    return 0;
 }
 
 int valid_spd(audio_data_t data) {
-    return data.bitrate == 16 && 
+    return data.format == 1 && 
         data.sample_rate == 44100 &&
         !data.has_metadata;
 }

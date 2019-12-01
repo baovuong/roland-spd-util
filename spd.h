@@ -8,16 +8,17 @@
 typedef struct audio_data {
     int sample_rate;
     int has_metadata;
-    int bitrate;
+    int format;
 } audio_data_t;
 
 /**
  * @brief 
  * 
+ * @param data 
  * @param path 
- * @return audio_data 
+ * @return int 
  */
-audio_data_t read_audio_file(char* path);
+int read_audio_file(char* path, audio_data_t* data);
 
 /**
  * @brief 
@@ -26,5 +27,12 @@ audio_data_t read_audio_file(char* path);
  * @return int 
  */
 int valid_spd(audio_data_t data);
+
+
+int extract_format();
+
+int extract_samplerate();
+
+// int extract_metadata_count(AVFormatContext* context);
 
 #endif
