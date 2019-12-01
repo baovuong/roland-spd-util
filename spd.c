@@ -50,6 +50,8 @@ int read_audio_file(char* path, audio_data_t* data) {
     data->format = stream->codecpar->format;
     data->has_metadata = av_dict_count(format->metadata) > 0;
 
+    avcodec_free_context(&codec_ctx);
+
     return 0;
 }
 
