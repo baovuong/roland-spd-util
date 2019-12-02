@@ -1,2 +1,10 @@
+
+# c stuff
 *.o
 spd_check 
+
+# cmake stuff
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+Makefile
